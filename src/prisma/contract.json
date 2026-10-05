@@ -374,50 +374,38 @@
               "foreignKeys": [],
               "indexes": [
                 {
-                  "columns": [
-                    "brand"
-                  ],
+                  "columns": ["brand"],
                   "name": "products_brand_idx_13825d71",
                   "prefix": "products_brand_idx",
                   "unique": false
                 },
                 {
-                  "columns": [
-                    "category"
-                  ],
+                  "columns": ["category"],
                   "name": "products_category_idx_f2600f8e",
                   "prefix": "products_category_idx",
                   "unique": false
                 },
                 {
-                  "columns": [
-                    "price"
-                  ],
+                  "columns": ["price"],
                   "name": "products_price_idx_696ad5eb",
                   "prefix": "products_price_idx",
                   "unique": false
                 },
                 {
-                  "columns": [
-                    "rating"
-                  ],
+                  "columns": ["rating"],
                   "name": "products_rating_idx_fcb0b199",
                   "prefix": "products_rating_idx",
                   "unique": false
                 },
                 {
-                  "columns": [
-                    "release_year"
-                  ],
+                  "columns": ["release_year"],
                   "name": "products_release_year_idx_fb38b8a4",
                   "prefix": "products_release_year_idx",
                   "unique": false
                 }
               ],
               "primaryKey": {
-                "columns": [
-                  "id"
-                ]
+                "columns": ["id"]
               },
               "uniques": []
             },
@@ -486,20 +474,14 @@
               "foreignKeys": [],
               "indexes": [],
               "primaryKey": {
-                "columns": [
-                  "id"
-                ]
+                "columns": ["id"]
               },
               "uniques": [
                 {
-                  "columns": [
-                    "email"
-                  ]
+                  "columns": ["email"]
                 },
                 {
-                  "columns": [
-                    "username"
-                  ]
+                  "columns": ["username"]
                 }
               ]
             }
