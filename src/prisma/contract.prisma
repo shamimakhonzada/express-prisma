@@ -1,0 +1,43 @@
+// use prisma-8
+model User {
+  id           String                     @id @default(uuid())
+  email        String                     @unique
+  username     String?                    @unique
+  avatar       String?
+  password     String?
+  name         String?
+
+  resetOtp     String?                    @map("reset_otp")
+  otpExpiry    TimestamptzString?         @map("otp_expiry")
+
+  refreshToken String?                    @map("refresh_token")
+
+  createdAt    TimestamptzString          @default(now()) @map("created_at")
+  updatedAt    temporal.updatedAtString() @map("updated_at")
+
+  @@map("users")
+}
+
+model Product {
+  id          String  @id @default(uuid())
+  name        String
+  category    String
+  brand       String
+  price       Float
+  rating      Float
+  stock       Int
+  status      String
+  featured    Boolean
+  releaseYear Int     @map("release_year")
+  color       String?
+  ram         Int?
+  storage     Int?
+  processor   String?
+
+  @@index([category])
+  @@index([brand])
+  @@index([price])
+  @@index([rating])
+  @@index([releaseYear])
+  @@map("products")
+}
