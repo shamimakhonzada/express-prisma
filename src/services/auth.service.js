@@ -5,7 +5,11 @@ import { transporter } from "../lib/email.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { verifyToken } from "../lib/jwt.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "../lib/jwt.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -123,13 +127,15 @@ export async function saveRefreshTokenService(userId, refreshToken) {
     throw httpError(400, "User ID and refresh token are required");
   }
 
+  const hashedRefreshToken = await argon2.hash(refreshToken);
+
   await db.orm.public.User.where({ id: userId }).update({
-    refreshToken,
+    refreshToken: hashedRefreshToken,
   });
 }
 
 export async function rotateUserSessionService(incomingRefreshToken) {
-  const decoded = verifyToken(user.refreshToken, incomingRefreshToken);
+  const decoded = verifyRefreshToken(incomingRefreshToken);
   if (!decoded || !decoded.id) {
     throw httpError(401, "Invalid or expired refresh token");
   }
@@ -147,8 +153,8 @@ export async function rotateUserSessionService(incomingRefreshToken) {
     throw httpError(403, "Session compromise suspected. Please sign in again.");
   }
 
-  const accessToken = generateToken({ id: user.id, email: user.email });
-  const newRefreshToken = generateToken({ id: user.id });
+  const accessToken = generateAccessToken({ id: user.id, email: user.email });
+  const newRefreshToken = generateRefreshToken({ id: user.id });
 
   await saveRefreshTokenService(user.id, newRefreshToken);
 

@@ -1,4 +1,4 @@
-import { verifyToken } from "../lib/jwt.js";
+import { verifyAccessToken } from "../lib/jwt.js";
 import { sendError } from "../lib/sendError.js";
 
 export const authMiddleware = (req, res, next) => {
@@ -10,7 +10,7 @@ export const authMiddleware = (req, res, next) => {
   }
 
   try {
-    const decoded = verifyToken(token);
+    const decoded = verifyAccessToken(token);
     console.log("Decoded token:", decoded); // Debugging line to log the decoded token
 
     if (!decoded) {

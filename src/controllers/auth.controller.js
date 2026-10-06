@@ -1,5 +1,5 @@
 import path from "node:path";
-import { generateToken } from "../lib/jwt.js";
+import { generateAccessToken, generateRefreshToken } from "../lib/jwt.js";
 import { sendSuccess } from "../lib/sendSuccess.js";
 import {
   loginService,
@@ -34,8 +34,8 @@ export async function loginController(req, res, next) {
   try {
     const { email, password } = req.body;
     const user = await loginService({ email, password });
-    const accessToken = generateToken({ id: user.id, email: user.email });
-    const refreshToken = generateToken({ id: user.id }); // Refresh token valid for 7 days
+    const accessToken = generateAccessToken({ id: user.id, email: user.email });
+    const refreshToken = generateRefreshToken({ id: user.id }); // Refresh token valid for 7 days
 
     // Save the refresh token in the database
     await saveRefreshTokenService(user.id, refreshToken);

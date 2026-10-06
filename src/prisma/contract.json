@@ -494,7 +494,7 @@
     "storageHash": "fa81d9d20dbbe088f84245487a87a399a9471337835088b9f63025848ad4b4ae"
   },
   "execution": {
-    "executionHash": "293587adab7a5c1c82a848b965ca200ceeb40a8145338323bc594f2c43c66f6e",
+    "executionHash": "59fc6d04733e623c37c05908b88c3117a0c7e0ae53f640da99debbd52a2aefbd",
     "mutations": {
       "defaults": [
         {
@@ -503,9 +503,9 @@
             "kind": "generator"
           },
           "ref": {
-            "column": "id",
-            "namespace": "public",
-            "table": "products"
+            "entry": "products",
+            "field": "id",
+            "namespace": "public"
           }
         },
         {
@@ -514,9 +514,9 @@
             "kind": "generator"
           },
           "ref": {
-            "column": "id",
-            "namespace": "public",
-            "table": "users"
+            "entry": "users",
+            "field": "id",
+            "namespace": "public"
           }
         },
         {
@@ -529,9 +529,9 @@
             "kind": "generator"
           },
           "ref": {
-            "column": "updated_at",
-            "namespace": "public",
-            "table": "users"
+            "entry": "users",
+            "field": "updated_at",
+            "namespace": "public"
           }
         }
       ]
@@ -550,6 +550,8 @@
       "checkConstraint": true,
       "defaultInInsert": true,
       "enums": true,
+      "insertOnConflictSkip": true,
+      "insertOnConflictWithoutTarget": true,
       "lateral": true,
       "returning": true,
       "scalarList": true

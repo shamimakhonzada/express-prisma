@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { db } from "../prisma/db.js";
+import { db } from "../prisma/db.ts";
 
 export function initializeCleanupWorker() {
   cron.schedule("0 0 * * *", async () => {
