@@ -23,7 +23,12 @@ export const verifyAccessToken = (token) => {
 export const verifyRefreshToken = (token) => {
   try {
     return jwt.verify(token, REFRESH_SECRET);
-  } catch {
+  } catch (error) {
+    if (config.nodeEnv !== "production") {
+      console.warn(
+        `[jwt] refresh token rejected: ${error.name} - ${error.message}`,
+      );
+    }
     return null; // expired, bad signature, malformed
   }
 };

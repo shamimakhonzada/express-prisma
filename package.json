@@ -26,6 +26,7 @@
     "morgan": "^1.12.1",
     "node-cron": "^4.6.0",
     "nodemailer": "^10.0.13",
+    "swagger-ui-express": "^5.0.1",
     "temporal-polyfill": "^1.0.5"
   },
   "devDependencies": {

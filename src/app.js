@@ -1,6 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import swaggerUi from "swagger-ui-express";
 
 // Middlewares
 import { notFoundHandler, errorHandler } from "./middlewares/errorHandler.js";
@@ -10,6 +11,9 @@ import { globalLimiter } from "./middlewares/rateLimiter.middleware.js";
 // Routes
 import rootRouter from "./routes/index.js";
 
+// Docs
+import { openapi } from "./docs/openapi.js";
+
 // Utility function
 import { sendSuccess } from "./lib/sendSuccess.js";
 
@@ -18,6 +22,29 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
+
+// API documentation (mounted before the rate limiter so the UI itself is not throttled)
+app.use(
+  "/api/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(openapi, {
+    customSiteTitle: "Nexura API Docs",
+    customCss:
+      ".swagger-ui .topbar { display: none } .swagger-ui .info-title { letter-spacing: -0.5px; }",
+    swaggerOptions: {
+      persistAuthorization: true,
+      withCredentials: true,
+      docExpansion: "list",
+      filter: true,
+      deepLinking: true,
+      tryItOutEnabled: true,
+    },
+  }),
+);
+
+app.get("/api/docs.json", (req, res) => {
+  res.json(openapi);
+});
 
 app.use(globalLimiter); // Apply global rate limiter to all routes
 

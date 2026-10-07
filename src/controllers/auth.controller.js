@@ -64,7 +64,7 @@ export async function loginController(req, res, next) {
   }
 }
 
-export async function logoutController(req, res) {
+export function logoutController(req, res) {
   res.clearCookie("access_token", { path: "/" });
   res.clearCookie("refresh_token", { path: "/api/v1/auth/refresh" });
   sendSuccess(res, 200, "Logged out successfully", null);
