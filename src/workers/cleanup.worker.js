@@ -1,31 +1,38 @@
 import cron from "node-cron";
 import { db } from "../prisma/db.ts";
 
-export function initializeCleanupWorker() {
-  cron.schedule("0 0 * * *", async () => {
+const REFRESH_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const CLEANUP_CRON_SCHEDULE = "0 0 * * *"; // every day at 00:00
+const CLEANUP_TIMEZONE = "Asia/Karachi";
+
+async function purgeExpiredRefreshTokens() {
+  try {
+    const expiryThreshold = new Date(
+      Date.now() - REFRESH_TOKEN_MAX_AGE_MS,
+    ).toISOString();
+
+    const purgedCount = await db.orm.public.User.where((user) =>
+      user.updatedAt.lt(expiryThreshold),
+    )
+      .where((user) => user.refreshToken.isNotNull())
+      .updateAndCount({ refreshToken: null });
+
     console.log(
-      "[Worker] Starting database cleanup: Purging expired refresh tokens...",
+      `[CleanupWorker] Purged ${purgedCount} expired refresh token(s).`,
     );
+  } catch (error) {
+    console.error(
+      "[CleanupWorker] Failed to purge expired refresh tokens:",
+      error,
+    );
+  }
+}
 
-    try {
-      // 1. Calculate the 7-day expiration boundary
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+export function initializeCleanupWorker() {
+  // Run once on startup, since node-cron does not catch up on missed runs.
+  purgeExpiredRefreshTokens();
 
-      // 2. Execute a fast, optimized batch update statement via Prisma 8
-      const result = await db.orm.public.User.where({
-        updatedAt: {
-          lt: sevenDaysAgo, // Less than 7 days ago
-        },
-        NOT: {
-          refreshToken: null, // Only scan active tokens to optimize database index performance
-        },
-      }).update({
-        refreshToken: null,
-      });
-
-      console.log(`[Worker] Token cleanup completed successfully.`);
-    } catch (error) {
-      console.error("[Worker Error] Failed to purge expired sessions:", error);
-    }
+  cron.schedule(CLEANUP_CRON_SCHEDULE, purgeExpiredRefreshTokens, {
+    timezone: CLEANUP_TIMEZONE,
   });
 }
