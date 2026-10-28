@@ -176,8 +176,8 @@ export const openapi = {
       "### Authentication",
       "Authentication is cookie-based (`httpOnly`), not `Authorization` header based:",
       "",
-      "- `access_token` — 15 min, scoped to `/`, read by `GET /secure`.",
-      "- `refresh_token` — 7 days, scoped to `/api/v1/auth/refresh`, rotated on every refresh.",
+      "- `access_token` — 15 min, scoped to `/`, checked against its active session on protected routes.",
+      "- `refresh_token` — opaque token, scoped to `/api/v1/auth/refresh`, rotated on every refresh.",
       "",
       "Sign in with `POST /api/v1/auth/signin`, then use **Authorize** in Swagger UI to send cookies.",
       "",
@@ -310,36 +310,20 @@ export const openapi = {
         operationId: "refreshSession",
         summary: "Rotate the session (new access + refresh cookies)",
         description: [
-          "Reads the `refresh_token` cookie, verifies it against the stored Argon2 hash,",
-          "then issues a fresh pair of cookies. Re-using a previously rotated token revokes the session (403).",
+          "Reads the opaque `refresh_token` cookie, hashes it with SHA-256, and looks up the active session.",
+          "A successful refresh replaces the stored hash and issues a new access and refresh cookie.",
+          "An expired, revoked, unknown, or previously rotated token returns 401.",
           "",
           setCookieNote([
             "`access_token=<jwt>; Path=/; Max-Age=900; HttpOnly`",
-            "`refresh_token=<jwt>; Path=/api/v1/auth/refresh; Max-Age=604800; HttpOnly`",
+            "`refresh_token=<opaque token>; Path=/api/v1/auth/refresh; HttpOnly`",
           ]),
         ].join("\n"),
         security: [{ refreshCookie: [] }],
         responses: {
-          200: {
-            description: "Session rotated successfully.",
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  required: ["success", "message"],
-                  properties: {
-                    success: { type: "boolean", enum: [true] },
-                    message: { type: "string" },
-                  },
-                },
-              },
-            },
-          },
+          200: success("Session rotated successfully.", { type: "null" }),
           401: errorResponse(
             "Refresh token missing, invalid, expired or revoked.",
-          ),
-          403: errorResponse(
-            "Token reuse detected — session revoked, sign in again.",
           ),
           429: errorResponse("Rate limit exceeded."),
         },
@@ -349,9 +333,28 @@ export const openapi = {
       post: {
         tags: ["Auth"],
         operationId: "signOut",
-        summary: "Clear auth cookies",
+        summary: "Revoke the current session",
+        security: [{ accessCookie: [] }],
         responses: {
           200: success("Logged out successfully.", { type: "null" }),
+          401: errorResponse("Token missing, invalid or expired."),
+          429: errorResponse("Rate limit exceeded."),
+        },
+      },
+    },
+    "/api/v1/auth/logout-all": {
+      post: {
+        tags: ["Auth"],
+        operationId: "signOutAll",
+        summary: "Revoke all sessions for the current user",
+        security: [{ accessCookie: [] }],
+        responses: {
+          200: success("Logged out from all devices.", {
+            type: "object",
+            required: ["revokedSessions"],
+            properties: { revokedSessions: { type: "integer" } },
+          }),
+          401: errorResponse("Token missing, invalid or expired."),
           429: errorResponse("Rate limit exceeded."),
         },
       },
@@ -496,7 +499,7 @@ export const openapi = {
         in: "cookie",
         name: "refresh_token",
         description:
-          "Long-lived (7 days) JWT set by `POST /api/v1/auth/signin` and rotated by `POST /api/v1/auth/refresh`.",
+          "Opaque token set by `POST /api/v1/auth/signin` and rotated by `POST /api/v1/auth/refresh`.",
       },
     },
     schemas: {
@@ -513,12 +516,6 @@ export const openapi = {
           username: { type: ["string", "null"] },
           name: { type: ["string", "null"] },
           avatar: { type: ["string", "null"] },
-          refreshToken: {
-            type: ["string", "null"],
-            description:
-              "Argon2 hash of the current refresh token. Internal — should not be exposed in responses.",
-            examples: ["$argon2id$v=19$m=65536,p=4,t=3$..."],
-          },
           createdAt: { type: "string", format: "date-time" },
           updatedAt: { type: "string", format: "date-time" },
         },

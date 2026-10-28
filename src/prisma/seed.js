@@ -1,5 +1,5 @@
 import { db } from "./db.ts";
-import products from "../data/products.js";
+import { products } from "../data/products.js";
 
 if (products.length !== 100) {
   throw new Error(`Expected 100 products, found ${products.length}`);

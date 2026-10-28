@@ -5,12 +5,6 @@ import { transporter } from "../lib/email.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  verifyRefreshToken,
-} from "../lib/jwt.js";
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -104,6 +98,10 @@ export async function resetPasswordService({ email, otp, newPassword }) {
     throw httpError(400, "OTP has expired");
   }
 
+  if (!user.resetOtp) {
+    throw httpError(400, "Invalid OTP code");
+  }
+
   const isValidOtp = await argon2.verify(user.resetOtp, otp);
   if (!isValidOtp) {
     throw httpError(400, "Invalid OTP code");
@@ -120,43 +118,6 @@ export async function resetPasswordService({ email, otp, newPassword }) {
     resetOtp: null,
     otpExpiry: null,
   });
-}
 
-export async function saveRefreshTokenService(userId, refreshToken) {
-  if (!userId || !refreshToken) {
-    throw httpError(400, "User ID and refresh token are required");
-  }
-
-  const hashedRefreshToken = await argon2.hash(refreshToken);
-
-  await db.orm.public.User.where({ id: userId }).update({
-    refreshToken: hashedRefreshToken,
-  });
-}
-
-export async function rotateUserSessionService(incomingRefreshToken) {
-  const decoded = verifyRefreshToken(incomingRefreshToken);
-  if (!decoded || !decoded.id) {
-    throw httpError(401, "Invalid or expired refresh token");
-  }
-
-  const user = await db.orm.public.User.where({ id: decoded.id }).first();
-  if (!user || !user.refreshToken) {
-    throw httpError(401, "Session not found or already revoked");
-  }
-
-  const isValid = await argon2.verify(user.refreshToken, incomingRefreshToken);
-  if (!isValid) {
-    await db.orm.public.User.where({ id: user.id }).update({
-      refreshToken: null,
-    });
-    throw httpError(403, "Session compromise suspected. Please sign in again.");
-  }
-
-  const accessToken = generateAccessToken({ id: user.id, email: user.email });
-  const newRefreshToken = generateRefreshToken({ id: user.id });
-
-  await saveRefreshTokenService(user.id, newRefreshToken);
-
-  return { accessToken, newRefreshToken };
+  return user.id;
 }

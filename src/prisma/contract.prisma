@@ -1,21 +1,43 @@
 // use prisma-8
 model User {
-  id           String                     @id @default(uuid())
-  email        String                     @unique
-  username     String?                    @unique
-  avatar       String?
-  password     String?
-  name         String?
+  id        String                     @id @default(uuid())
+  email     String                     @unique
+  username  String?                    @unique
+  avatar    String?
+  password  String?
+  name      String?
 
-  resetOtp     String?                    @map("reset_otp")
-  otpExpiry    TimestamptzString?         @map("otp_expiry")
+  resetOtp  String?                    @map("reset_otp")
+  otpExpiry TimestamptzString?         @map("otp_expiry")
 
-  refreshToken String?                    @map("refresh_token")
+  sessions  Session[]
 
-  createdAt    TimestamptzString          @default(now()) @map("created_at")
-  updatedAt    temporal.updatedAtString() @map("updated_at")
+  createdAt TimestamptzString          @default(now()) @map("created_at")
+  updatedAt temporal.updatedAtString() @map("updated_at")
 
   @@map("users")
+}
+
+model Session {
+  id               String                     @id @default(uuid())
+  userId           String                     @map("user_id")
+  user             User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  refreshTokenHash String                     @unique @map("refresh_token_hash")
+
+  userAgent        String?                    @map("user_agent")
+  ipAddress        String?                    @map("ip_address")
+
+  expiresAt        TimestamptzString          @map("expires_at")
+  revokedAt        TimestamptzString?         @map("revoked_at")
+  lastUsedAt       TimestamptzString?         @map("last_used_at")
+
+  createdAt        TimestamptzString          @default(now()) @map("created_at")
+  updatedAt        temporal.updatedAtString() @map("updated_at")
+
+  @@index([userId])
+  @@index([userId, revokedAt])
+  @@map("sessions")
 }
 
 model Product {

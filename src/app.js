@@ -1,5 +1,6 @@
 import express from "express";
 import morgan from "morgan";
+import cors from "cors";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
 
@@ -22,6 +23,12 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+  }),
+);
 
 // API documentation (mounted before the rate limiter so the UI itself is not throttled)
 app.use(

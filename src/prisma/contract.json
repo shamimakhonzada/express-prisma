@@ -8,6 +8,10 @@
       "model": "Product",
       "namespace": "public"
     },
+    "sessions": {
+      "model": "Session",
+      "namespace": "public"
+    },
     "users": {
       "model": "User",
       "namespace": "public"
@@ -168,6 +172,130 @@
               "table": "products"
             }
           },
+          "Session": {
+            "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "expiresAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "ipAddress": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "lastUsedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "refreshTokenHash": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "revokedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "userAgent": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "user": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": ["userId"],
+                  "targetFields": ["id"]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "created_at"
+                },
+                "expiresAt": {
+                  "column": "expires_at"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "ipAddress": {
+                  "column": "ip_address"
+                },
+                "lastUsedAt": {
+                  "column": "last_used_at"
+                },
+                "refreshTokenHash": {
+                  "column": "refresh_token_hash"
+                },
+                "revokedAt": {
+                  "column": "revoked_at"
+                },
+                "updatedAt": {
+                  "column": "updated_at"
+                },
+                "userAgent": {
+                  "column": "user_agent"
+                },
+                "userId": {
+                  "column": "user_id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "sessions"
+            }
+          },
           "User": {
             "fields": {
               "avatar": {
@@ -219,13 +347,6 @@
                   "kind": "scalar"
                 }
               },
-              "refreshToken": {
-                "nullable": true,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
               "resetOtp": {
                 "nullable": true,
                 "type": {
@@ -248,7 +369,19 @@
                 }
               }
             },
-            "relations": {},
+            "relations": {
+              "sessions": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": ["id"],
+                  "targetFields": ["userId"]
+                },
+                "to": {
+                  "model": "Session",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
                 "avatar": {
@@ -271,9 +404,6 @@
                 },
                 "password": {
                   "column": "password"
-                },
-                "refreshToken": {
-                  "column": "refresh_token"
                 },
                 "resetOtp": {
                   "column": "reset_otp"
@@ -409,6 +539,101 @@
               },
               "uniques": []
             },
+            "sessions": {
+              "columns": {
+                "created_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "expires_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "ip_address": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "last_used_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "refresh_token_hash": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "revoked_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "updated_at": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "user_agent": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": ["user_id"],
+                    "namespaceId": "public",
+                    "tableName": "sessions"
+                  },
+                  "target": {
+                    "columns": ["id"],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": ["user_id"],
+                  "name": "sessions_user_id_idx_6c952402",
+                  "prefix": "sessions_user_id_idx",
+                  "unique": false
+                },
+                {
+                  "columns": ["user_id", "revoked_at"],
+                  "name": "sessions_user_id_revoked_at_idx_4c62e965",
+                  "prefix": "sessions_user_id_revoked_at_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": ["id"]
+              },
+              "uniques": [
+                {
+                  "columns": ["refresh_token_hash"]
+                }
+              ]
+            },
             "users": {
               "columns": {
                 "avatar": {
@@ -450,11 +675,6 @@
                   "nativeType": "text",
                   "nullable": true
                 },
-                "refresh_token": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": true
-                },
                 "reset_otp": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
@@ -491,10 +711,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "fa81d9d20dbbe088f84245487a87a399a9471337835088b9f63025848ad4b4ae"
+    "storageHash": "6f84ab506fe6c8265f31e7985effff9d07bfe42fb214f2c1c50a20f0fa7b83b9"
   },
   "execution": {
-    "executionHash": "59fc6d04733e623c37c05908b88c3117a0c7e0ae53f640da99debbd52a2aefbd",
+    "executionHash": "01180fd64e94ca1f8289106e2dc9ce3805ac6c4db18c060b26ed3f12087d0301",
     "mutations": {
       "defaults": [
         {
@@ -505,6 +725,32 @@
           "ref": {
             "entry": "products",
             "field": "id",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "sessions",
+            "field": "id",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "onUpdate": {
+            "id": "timestampNow",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "sessions",
+            "field": "updated_at",
             "namespace": "public"
           }
         },

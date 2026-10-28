@@ -5,8 +5,10 @@ import {
   forgotPasswordController,
   resetPasswordController,
   logoutController,
+  logoutAllController,
   refreshSessionController,
 } from "../controllers/auth.controller.js";
+import { authMiddleware } from "../middlewares/authenticate.middleware.js";
 import {
   loginLimiter,
   passwordResetLimiter,
@@ -16,7 +18,8 @@ const router = Router();
 
 router.post("/signup", registerUserController);
 router.post("/signin", loginLimiter, loginController);
-router.post("/logout", logoutController);
+router.post("/logout", authMiddleware, logoutController);
+router.post("/logout-all", authMiddleware, logoutAllController);
 router.post("/forgot-password", passwordResetLimiter, forgotPasswordController);
 router.post("/reset-password", passwordResetLimiter, resetPasswordController);
 
